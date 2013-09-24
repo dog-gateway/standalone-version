@@ -1,0 +1,214 @@
+#!/bin/bash
+#
+# /etc/init.d/dog -- startup script for the Domotic OSGI Gateway
+#
+### BEGIN INIT INFO
+# Provides:  dog
+# Required-Start:$local_fs $remote_fs $network
+# Required-Stop: $local_fs $remote_fs $network
+# Should-Start:  $named
+# Should-Stop:   $named
+# Default-Start: 2 3 4 5
+# Default-Stop:  0 1 6
+# Short-Description: Start dog.
+# Description:   Start Domotic OSGI Gateway.
+### END INIT INFO
+
+
+if [ `id -u` -ne 0 ]; then
+echo "You need root privileges to run this script"
+exit 1
+fi
+
+# Source LSB function library.
+if [ -r /lib/lsb/init-functions ]; then
+    . /lib/lsb/init-functions
+else
+    exit 1
+fi
+
+# For SELinux we need to use 'runuser' not 'su'
+if [ -x "/sbin/runuser" ]; then
+    SU="/sbin/runuser"
+else
+    SU="/bin/su"
+fi
+
+NAME=dog
+DESC="Domotic OSGI Gateway"
+DAEMON=/usr/local/bin/start_dog
+DOG_PID=/var/run/$NAME.pid
+DEFAULT=/etc/default/$NAME
+
+# The following variables can be overwritten in $DEFAULT
+DOG_USER=dog
+DOG_GROUP=users
+OSGI_CONSOLE_PORT=7777
+DOG_HOME=/usr/local/lib/Dog2.3/
+DOG_CONFIG_FOLDER="$DOG_HOME/configuration/KnxIPDemoBox"
+OSGI_JAR_LOCATION="$DOG_HOME/org.eclipse.osgi_3.6.2.R36x_v20110210.jar"
+LOG_FILE_LOCATION="/var/log/dog/dog.out"
+
+# overwrite settings from default file
+if [ -f "$DEFAULT" ]; then
+. "$DEFAULT"
+fi
+
+# pulled from RHEL4 /etc/rc.d/init.d/functions
+function checkpid() {
+    local i
+    for i in $* ; do
+        if [ -d "/proc/${i}" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+
+# Shell functions sourced from /etc/rc.status:
+#      rc_check         check and set local and overall rc status
+#      rc_status        check and set local and overall rc status
+#      rc_status -v     ditto but be verbose in local rc status
+#      rc_status -v -r  ditto and clear the local rc status
+#      rc_failed        set local and overall rc status to failed
+#      rc_failed <num>  set local and overall rc status to <num><num>
+#      rc_reset         clear local rc status (overall remains)
+#      rc_exit          exit appropriate to overall rc status
+. /etc/rc.status
+
+# First reset status of this service
+rc_reset
+
+# Return values acc. to LSB for all commands but status:
+# 0 - success
+# 1 - generic or unspecified error
+# 2 - invalid or excess argument(s)
+# 3 - unimplemented feature (e.g. "reload")
+# 4 - insufficient privilege
+# 5 - program is not installed
+# 6 - program is not configured
+# 7 - program is not running
+# 
+# Note that starting an already running service, stopping
+# or restarting a not-running service as well as the restart
+# with force-reload (in case signalling is not supported) are
+# considered a success.
+
+function start()
+{
+	if [ -f "/var/run/${NAME}.pid" ]; then
+            read kpid < /var/run/${NAME}.pid
+                if checkpid $kpid 2>&1; then
+                    echo "$NAME process already running"
+                        rc_failed 0
+                    else
+                        echo -n "lock file found but no process running for pid $kpid, continuing"
+                        rc_failed 7
+				fi
+    fi
+	
+	# fix permissions on the log and pid files
+    export DOG_PID="/var/run/$NAME.pid"
+    touch $DOG_PID
+    chown ${DOG_USER}:${DOG_GROUP} $DOG_PID
+    touch $LOG_FILE_LOCATION
+    chown ${DOG_USER}:${DOG_GROUP} $LOG_FILE_LOCATION
+	
+
+    $SU - $DOG_USER -c "$DAEMON $OSGI_CONSOLE_PORT $OSGI_JAR_LOCATION $DOG_CONFIG_FOLDER $LOG_FILE_LOCATION ${DOG_PID} $DOG_HOME" >> $LOG_FILE_LOCATION 2>&1
+
+    RETVAL="$?"
+    if [ "$RETVAL" -eq 0 ]; then 
+        rc_failed 0
+        touch /var/run/rc${NAME}
+    else
+        rc_failed 7
+    fi
+    rc_status -v
+}
+
+## Check status with checkproc(8), if process is running
+## checkproc will return with exit status 0.
+
+# Status has a slightly different for the status command:
+# 0 - service running
+# 1 - service dead, but /var/run/  pid  file exists
+# 2 - service dead, but /var/lock/ lock file exists
+# 3 - service not running
+
+# NOTE: checkproc returns LSB compliant status values.
+function status() {
+    echo -n "Checking for Dog (DOG_HOME)"
+    if [ -f "/var/run/${NAME}.pid" ]; then
+        read kpid < /var/run/${NAME}.pid
+        if checkpid $kpid 2>&1; then
+            rc_failed 0
+        else
+            rc_failed 2
+        fi
+    else
+        #don't be dependent on procps
+        #pid="$(/usr/bin/pgrep -u $DOG_USER java)"
+        pid="$(ps U $DOG_USER o pid,cmd | grep java | grep -v 'grep java')"
+        if [ -n "$pid" ]; then
+            echo "$0 running (${pid}) but no PID file exists"
+            rc_failed 0
+        else
+            rc_failed 3
+        fi
+    fi
+    rc_status -v
+}
+
+function stop() {
+    echo -n "Shutting down Dog ($DOG_HOME)"
+    if [ -f "/var/run/${NAME}.pid" ]; then
+        read kpid < /var/run/${NAME}.pid
+        kill -9 $kpid
+    fi
+    rc_failed 0
+	rm -f /var/run/${NAME}.pid
+	rc_status -v
+}
+
+case "$1" in
+    start)
+        echo -n echo -n "Starting $DESC $NAME"
+        start
+        rc_status -v
+        ;;
+    stop)
+        echo -n "Shutting down $DESC $NAME daemon"
+        stop
+        rc_status -v
+        ;;
+    try-restart)
+        $0 status >/dev/null &&  $0 restart
+        rc_status
+        ;;
+    restart)
+        $0 stop
+        $0 start
+        rc_status
+        ;;
+    force-reload)
+        echo -n "Reload service $NAME"
+        checkproc $DAEMON 
+        rc_status -v
+        ;;
+    reload)
+        rc_status -v
+        ;;
+    status)
+        status
+        rc_status -v
+        ;;
+    probe)
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status|try-restart|restart|force-reload|reload|probe}"
+        exit 1
+        ;;
+esac
+

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+JDK_DIRS="/usr/lib/jvm/java-6-openjdk /usr/lib/jvm/java-6-sun /usr/lib/jvm/java-1.5.0-sun /usr/lib/j2sdk1.5-sun /usr/lib/j2sdk1.5-ibm"
+
+# Look for the right JVM to use
+for jdir in $JDK_DIRS; do
+if [ -r "$jdir/bin/java" -a -z "${JAVA_HOME}" ]; then
+JAVA_HOME="$jdir"
+fi
+done
+export JAVA_HOME
+
+OSGI_CONSOLE_PORT="$1"
+OSGI_JAR_LOCATION="$2"
+DOG_CONFIG_FOLDER="$3"
+LOG_FILE_LOCATION="$4"
+
+JAVA_OPTS="-DforceSimpleModel=true -DconfigFolder=$DOG_CONFIG_FOLDER"
+
+
+#$DOG_HOME/org.eclipse.osgi_3.6.2.R36x_v20110210.jar
+cd $6
+java $JAVA_OPTS -jar $OSGI_JAR_LOCATION -console $OSGI_CONSOLE_PORT -clean -Xmx512M >> $4 2>&1 &
+#echo  "$DOG_PID"
+#if [ ! -z "$DOG_PID" ]; then
+      echo $! > $5
+#    fi

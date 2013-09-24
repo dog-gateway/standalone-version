@@ -1,0 +1,2 @@
+Place in the dog folder all the Dog2 - Core bundles.
+Place in the osgi folder the new versions of the OSGi libraries (if any).

@@ -1,0 +1,8 @@
+DOG_USER=dog
+DOG_GROUP=dog
+#leave this empty if you don't want osgi console to listen to localhost:$OSGI_CONSOLE_PORT
+OSGI_CONSOLE_PORT=7777
+DOG_HOME=/usr/local/lib/Dog2.3/
+DOG_CONFIG_FOLDER="$DOG_HOME/configuration/DemoBox"
+OSGI_JAR_LOCATION="$DOG_HOME/org.eclipse.osgi_3.6.2.R36x_v20110210.jar"
+LOG_FILE_LOCATION="/var/log/dog/dog.out"

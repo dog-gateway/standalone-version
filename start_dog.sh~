@@ -1,0 +1,2 @@
+java -Dorg.osgi.service.http.port=8090 -DconfigFolder=configuration/DemoBox -jar org.eclipse.osgi_3.8.0.v20120529-1548.jar -console -clean -Xmx512M
+

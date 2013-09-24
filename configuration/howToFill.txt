@@ -1,0 +1,2 @@
+Place in DemoBox the content of a DogConfigurationRepository folder.
+Edit the config.ini file to add new Dog2 - Core bundle.
