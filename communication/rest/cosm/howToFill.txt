@@ -1,1 +1,0 @@
-Place here the COSM bundles defined in dog.
