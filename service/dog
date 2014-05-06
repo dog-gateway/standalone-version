@@ -1,8 +1,3 @@
-if [ -r /etc/default/locale ]; then
-  . /etc/default/locale
-  export LANG LANGUAGE
-fi
-
 #! /bin/sh
 ### BEGIN INIT INFO
 # Provides:          dog
@@ -15,22 +10,26 @@ fi
 # Short-Description: Dog
 # Description:       Domotic OSGi Gateway service
 ### END INIT INFO
+
+# Author: Dario Bonino <dario.bonino@polito.it>, Luigi De Russis <luigi.derussis@polito.it>
 #
-# Author:       Dario Bonino <dario.bonino@polito.it>, Luigi De Russis <luigi.derussis@polito.it>
-#
+
 set -e
 
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/home/pi/dog/start_dog
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+DAEMON_PATH=/home/pi/dog
+NAME=start_dog
 LOG_DIR=/var/log/dog
-LOG_FILE_LOCATION=/var/log/dog/dog.log
+LOG_FILE_LOCATION=$LOG_DIR/dog.log
 HTTP_PORT=8080
+DOG_USER=pi
+DOG_GROUP=users
 
-test -x $DAEMON || exit 0
+test -x $DAEMON_PATH/$NAME || exit 0
 
 if [ -r /etc/default/locale ]; then
   . /etc/default/locale
-  export LANG LANGUAGE
+  export LANG
 fi
 
 . /lib/lsb/init-functions
@@ -39,13 +38,13 @@ export PATH=$PATH
 
 if [ ! -d "$LOG_DIR" ]; then
  mkdir "$LOG_DIR"
- chown pi:users "$LOG_DIR"
+ chown $DOG_USER:$DOG_GROUP "$LOG_DIR"
 fi
 
 case "$1" in
   start)
         log_daemon_msg "Starting Dog" "dog"
-        start-stop-daemon -b --start -c pi:pi -u pi -m --pidfile /var/run/dog.pid -x /bin/bash -- -c "$DAEMON $HTTP_PORT $LOG_FILE_LOCATION" || echo -n " already running"
+        start-stop-daemon -b --start -c $DOG_USER:$DOG_GROUP -u $DOG_USER -m --pidfile /var/run/dog.pid --chdir $DAEMON_PATH --exec $NAME -- $HTTP_PORT $LOG_FILE_LOCATION || echo -n " already running"
         log_end_msg $?
   ;;
   stop)
@@ -53,9 +52,6 @@ case "$1" in
         set +e
         start-stop-daemon --stop --quiet --signal 9 --pidfile /var/run/dog.pid  --retry 5
         rm /var/run/dog.pid
-        #ps -u pi | grep z-agent | awk '{print $1}' > /var/run/zagent.pid
-        #start-stop-daemon --stop --quiet --signal 9 --pidfile /var/run/zagent.pid  --retry 5
-        #rm /var/run/zagent.pid
         set -e
         log_end_msg $?
   ;;
