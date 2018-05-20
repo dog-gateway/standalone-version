@@ -1,3 +1,1 @@
-java -Dorg.osgi.service.http.port=8080 -DconfigFolder=configuration/config -jar org.eclipse.osgi_3.10.1.v20140909-1633.jar -console -clean
-
-
+java -Dorg.osgi.service.http.port=8080 -DconfigFolder=configuration/config -jar org.eclipse.osgi_3.11.3.v20170209-1843.jar -console -clean
