@@ -1,3 +1,0 @@
-#!/bin/sh
-
-exec java -Declipse.ignoreApp=true -Dosgi.noShutdown=true -Dorg.osgi.service.http.port=$1 -DconfigFolder=configuration/config -jar org.eclipse.osgi_3.9.0.v20130529-1710.jar -console 7777 -clean > $2
