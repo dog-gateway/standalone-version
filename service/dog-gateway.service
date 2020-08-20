@@ -9,7 +9,7 @@ Type=simple
 User=dog
 Group=dog
 WorkingDirectory=/opt/dog-gateway
-ExecStart=/usr/bin/java -Xmx128m -Dorg.osgi.service.http.port=8080 -DconfigFolder=/etc/dog/config -jar org.eclipse.osgi_3.15.100.v20191114-1701.jar -clean -console 65300
+ExecStart=/usr/bin/java -Xmx128m -Dorg.osgi.service.http.port=8080 -DconfigFolder=/etc/dog/config -jar org.eclipse.osgi_3.15.300.v20200520-1959.jar -clean -console 65300
 Restart=always
 RestartSec=5
 StandardOutput=syslog
