@@ -1,16 +1,2 @@
 Place in the dog folder all the Dog2 - Core bundles.
 Place in the osgi folder the new versions of the OSGi libraries (if any).
-
-For example:
-it.polito.elite.dog.core.clock_1.0.0.jar
-it.polito.elite.dog.core.devicefactory_1.1.1.jar
-it.polito.elite.dog.core.devicemanager_1.0.0.jar
-it.polito.elite.dog.core.housemodel.simple_1.2.2.jar
-it.polito.elite.dog.core.library_1.2.0.jar
-it.polito.elite.dog.core.library.jaxb_1.2.1.jar
-it.polito.elite.dog.core.library.measure_1.0.0.jar
-it.polito.elite.dog.core.library.stream_1.0.0.jar
-it.polito.elite.dog.core.log.console_1.0.0.jar
-it.polito.elite.dog.core.monitoradmin_1.0.0.jar
-org.doggateway.serial.utils_1.0.0.jar
-org.doggateway.shutdown.hook_1.0.0.jar

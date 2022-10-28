@@ -1,8 +1,0 @@
-Place here all driver bundles. For example:
-
-it.polito.elite.dog.drivers.modbus.gateway_1.1.5.jar
-it.polito.elite.dog.drivers.modbus.network_1.2.3.jar
-org.doggateway.drivers.enocean.gateway_1.0.1.jar
-org.doggateway.drivers.enocean.network_1.0.1.jar
-org.doggateway.drivers.enocean.rockerswitch_1.0.1.jar
-org.doggateway.drivers.enocean.temperaturesensor_1.0.1.jar
